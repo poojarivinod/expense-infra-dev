@@ -14,3 +14,10 @@ variable "common_tags" {
     }
 }
 
+variable "zone_id" {
+    default = "Z0802349255PD9KZJ7SQF" # Route53 --> Hosted zones --> poojari.store --> click on Hosted zone details
+}
+
+variable "domain_name" {
+    default = "poojari.store"
+}

@@ -4,3 +4,32 @@ resource "aws_ssm_parameter" "mysql_sg_id" { # ssm parameter store terraform -->
   value = module.mysql_sg.sg_id
 }
 
+resource "aws_ssm_parameter" "backend_sg_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/backend_sg_id"
+  type  = "String"
+  value = module.backend_sg.sg_id
+}
+
+resource "aws_ssm_parameter" "frontend_sg_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/frontend_sg_id"
+  type  = "String"
+  value = module.frontend_sg.sg_id
+}
+
+resource "aws_ssm_parameter" "bastion_sg_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/bastion_sg_id"
+  type  = "String"
+  value = module.bastion_sg.sg_id
+}
+
+resource "aws_ssm_parameter" "app_alb_sg_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/app_alb_sg_id"
+  type  = "String"
+  value = module.app_alb_sg.sg_id # in module.app_alb_sg, we get group of information , we take sg_id information
+}
+
+resource "aws_ssm_parameter" "vpn_sg_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/vpn_sg_id"
+  type  = "String"
+  value = module.vpn_sg.sg_id # in module.vpn_sg, we get group of information , we take sg_id information
+}

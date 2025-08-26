@@ -13,4 +13,3 @@ variable "common_tags" {
         terraform = "true"
     }
 }
-

@@ -11,3 +11,15 @@ module "vpc" {
     database_subnet_cidrs = var.database_subnet_cidrs
     is_pairing_required = true # it override the default information of false
 }
+
+resource "aws_db_subnet_group" "expense" { # aws db subnet group terraform --> terraform registry
+  name       = "${var.project_name}-${var.environment}"
+  subnet_ids = module.vpc.database_subnet_ids
+
+  tags = merge(
+    var.common_tags,
+    {
+        Name = "${var.project_name}-${var.environment}"
+    }
+  )
+}
