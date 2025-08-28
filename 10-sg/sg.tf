@@ -1,3 +1,4 @@
+# security group module for mysql
 module "mysql_sg" {
     # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
     source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
@@ -9,6 +10,7 @@ module "mysql_sg" {
     common_tags = var.common_tags
 }
 
+# security group module for backend
 module "backend_sg" {
     # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
     source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
@@ -20,6 +22,7 @@ module "backend_sg" {
     common_tags = var.common_tags
 }
 
+# security group module for frontend
 module "frontend_sg" { # every module we add, we need to pass "terraform init" otherwise it will show error
     # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
     source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
@@ -31,7 +34,7 @@ module "frontend_sg" { # every module we add, we need to pass "terraform init" o
     common_tags = var.common_tags
 }
 
-# seperate security group required for bastion
+# security group module for bastion
 module "bastion_sg" { # every module we add, we need to pass "terraform init" otherwise it will show error
     # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
     source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
@@ -43,7 +46,7 @@ module "bastion_sg" { # every module we add, we need to pass "terraform init" ot
     common_tags = var.common_tags
 }
 
-# seperate security group required for vpn , vpn ports are 22, 443, 1194, 943.
+# security group module for vpn , vpn ports are 22, 443, 1194, 943.
 module "vpn_sg" { # every module we add, we need to pass "terraform init" otherwise it will show error
     # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
     source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
@@ -55,7 +58,7 @@ module "vpn_sg" { # every module we add, we need to pass "terraform init" otherw
     common_tags = var.common_tags
 }
 
-
+# security group module for app_alb 
 module "app_alb_sg" { # every module we add, we need to pass "terraform init" otherwise it will show error
     # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
     source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
@@ -77,7 +80,7 @@ resource "aws_security_group_rule" "app_alb_bastion" { # terraform aws security 
   security_group_id = module.app_alb_sg.sg_id
 }
 
-#
+# To get traffic from internet to bastion
 resource "aws_security_group_rule" "bastion_public" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
   from_port         = 22
@@ -87,6 +90,7 @@ resource "aws_security_group_rule" "bastion_public" { # terraform aws security g
   security_group_id = module.bastion_sg.sg_id
 }
 
+# To get traffic from internet to vpn
 resource "aws_security_group_rule" "vpn_ssh" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
   from_port         = 22
@@ -96,6 +100,7 @@ resource "aws_security_group_rule" "vpn_ssh" { # terraform aws security group ru
   security_group_id = module.vpn_sg.sg_id
 }
 
+# vpn traffic
 resource "aws_security_group_rule" "vpn_443" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
   from_port         = 443
@@ -105,6 +110,7 @@ resource "aws_security_group_rule" "vpn_443" { # terraform aws security group ru
   security_group_id = module.vpn_sg.sg_id
 }
 
+# vpn traffic
 resource "aws_security_group_rule" "vpn_943" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
   from_port         = 943
@@ -114,6 +120,7 @@ resource "aws_security_group_rule" "vpn_943" { # terraform aws security group ru
   security_group_id = module.vpn_sg.sg_id
 }
 
+# vpn traffic
 resource "aws_security_group_rule" "vpn_1194" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
   from_port         = 1194
@@ -123,6 +130,7 @@ resource "aws_security_group_rule" "vpn_1194" { # terraform aws security group r
   security_group_id = module.vpn_sg.sg_id
 }
 
+# app load balancer accept the traffic from vpn
 resource "aws_security_group_rule" "app_alb_vpn" { # app_alb accepting traffic through vpn
   type              = "ingress"
   from_port         = 80
@@ -132,6 +140,7 @@ resource "aws_security_group_rule" "app_alb_vpn" { # app_alb accepting traffic t
   security_group_id = module.app_alb_sg.sg_id
 }
 
+# mysql accept the traffic from bastion
 resource "aws_security_group_rule" "mysql_bastion" { # mysql accepting traffic through bastion
   type              = "ingress"
   from_port         = 3306
@@ -141,5 +150,33 @@ resource "aws_security_group_rule" "mysql_bastion" { # mysql accepting traffic t
   security_group_id = module.mysql_sg.sg_id
 }
 
+# mysql accept the traffic from vpn
+resource "aws_security_group_rule" "mysql_vpn" { # mysql accepting traffic through bastion
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  source_security_group_id = module.vpn_sg.sg_id
+  security_group_id = module.mysql_sg.sg_id
+}
 
+# backend accept the traffic from vpn
+resource "aws_security_group_rule" "backend_vpn" { # mysql accepting traffic through bastion
+  type              = "ingress"
+  from_port         = 22 # to have ssh access
+  to_port           = 22
+  protocol          = "tcp"
+  source_security_group_id = module.vpn_sg.sg_id
+  security_group_id = module.backend_sg.sg_id
+}
+
+# mysql accept the traffic from backend
+resource "aws_security_group_rule" "mysql_backend" { # mysql accepting traffic through bastion
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  source_security_group_id = module.backend_sg.sg_id
+  security_group_id = module.mysql_sg.sg_id
+}
 
