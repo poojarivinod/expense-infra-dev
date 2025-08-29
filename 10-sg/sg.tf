@@ -170,6 +170,16 @@ resource "aws_security_group_rule" "backend_vpn" { # mysql accepting traffic thr
   security_group_id = module.backend_sg.sg_id
 }
 
+# backend accept the traffic from vpn for developers
+resource "aws_security_group_rule" "backend_vpn_http" { # mysql accepting traffic through bastion
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8080
+  protocol          = "tcp"
+  source_security_group_id = module.vpn_sg.sg_id
+  security_group_id = module.backend_sg.sg_id
+}
+
 # mysql accept the traffic from backend
 resource "aws_security_group_rule" "mysql_backend" { # mysql accepting traffic through bastion
   type              = "ingress"

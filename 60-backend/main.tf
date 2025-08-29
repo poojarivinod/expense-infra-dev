@@ -6,7 +6,7 @@ resource "aws_instance" "backend" {                       #terraform aws ec2
   tags = merge(
     var.common_tags,
     {
-        Name = "${var.project_name}-${var.environment}-backend"
+        Name = local.resource_name
     }
   )
 }
@@ -32,11 +32,31 @@ resource "null_resource" "backend" { # null resource in terraform --> terraform 
     destination = "/tmp/backend.sh"
   }
 
-  provisioner "remote-exec" {
+  provisioner "remote-exec" { # it run in the backend server
     # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/backend.sh", # it provides execute permission
       "sudo sh /tmp/backend.sh ${var.environment}" # execution of /tmp/backend.sh
     ]
   }
+}
+
+resource "aws_ec2_instance_state" "backend" { #terraform stop ec2 instance --> stack overflow
+  instance_id = aws_instance.backend.id
+  state       = "stopped"
+  depends_on  = [null_resource.backend] #terraform executes all resources at a time, so,  this commond tells terraform that this resourse depends on null resouse. so, this will execute after null resourse
+}
+
+resource "aws_ami_from_instance" "backend" { #aws ami from instance terraform --> terraform registry
+  name               = local.resource_name
+  source_instance_id = aws_instance.backend.id
+  depends_on  = [aws_ec2_instance_state.backend] # this resource will run after instanse is completly stoped
+}
+
+resource "null_resource" "backend-delete" { # we don't have resource to delete ec2 instanse, so we are using null_resource.
+  provisioner "local-exec" { # it will execute aws command in the local laptop
+    command =  "aws ec2 terminate-instances --instance-ids ${aws_instance.backend.id}" #aws command line delete instance --> stack overflow 
+  }
+
+  depends_on = [aws_ami_from_instance.backend] # it is executed after "aws ami is created".
 }
