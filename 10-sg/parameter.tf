@@ -28,6 +28,12 @@ resource "aws_ssm_parameter" "app_alb_sg_id" { # ssm parameter store terraform -
   value = module.app_alb_sg.sg_id # in module.app_alb_sg, we get group of information , we take sg_id information
 }
 
+resource "aws_ssm_parameter" "web_alb_sg_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/web_alb_sg_id"
+  type  = "String"
+  value = module.web_alb_sg.sg_id # in module.web_alb_sg, we get group of information , we take sg_id information
+}
+
 resource "aws_ssm_parameter" "vpn_sg_id" { # ssm parameter store terraform --> terraform registry
   name  = "/${var.project_name}/${var.environment}/vpn_sg_id"
   type  = "String"

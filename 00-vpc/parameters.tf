@@ -4,8 +4,8 @@ resource "aws_ssm_parameter" "vpc_id" { # ssm parameter store terraform --> terr
   value = module.vpc.vpc_id
 }
 
-resource "aws_ssm_parameter" "public_subnet_ids" { # ssm parameter store terraform --> terraform registry
-  name  = "/${var.project_name}/${var.environment}/public_subnet_ids"
+resource "aws_ssm_parameter" "public_subnet_id" { # ssm parameter store terraform --> terraform registry
+  name  = "/${var.project_name}/${var.environment}/public_subnet_id"
   type  = "StringList"
   value = join(",", module.vpc.public_subnet_ids) # it will convert list to string list public_subnet_ids
 } # terraform join funtion --> terraform registry
@@ -27,4 +27,4 @@ resource "aws_ssm_parameter" "database_subnet_group_name" { # ssm parameter stor
   name  = "/${var.project_name}/${var.environment}/database_subnet_group_name"
   type  = "String"
   value = aws_db_subnet_group.expense.name 
-} # terraform join funtion --> terraform registry
+} 

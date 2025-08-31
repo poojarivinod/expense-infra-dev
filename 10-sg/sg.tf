@@ -70,6 +70,18 @@ module "app_alb_sg" { # every module we add, we need to pass "terraform init" ot
     common_tags = var.common_tags
 }
 
+# security group module for web_alb 
+module "web_alb_sg" { # every module we add, we need to pass "terraform init" otherwise it will show error
+    # source = "..//terraform-aws-securitygroup" #for testing , once completed use below source
+    source = "git::https://github.com/poojarivinod/terraform-aws-securitygroup.git?ref=main"
+    project_name = var.project_name
+    environment = var.environment
+    sg_name = "web-alb"
+    sg_description = "created for frontend ALB instance in expense dev"
+    vpc_id = data.aws_ssm_parameter.vpc_id.value # # it read the content of /expense/dev//vpc_id ssm parameter
+    common_tags = var.common_tags
+}
+
 # app load balancer accept the traffic from bastion host
 resource "aws_security_group_rule" "app_alb_bastion" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
@@ -180,6 +192,16 @@ resource "aws_security_group_rule" "backend_vpn_http" { # mysql accepting traffi
   security_group_id = module.backend_sg.sg_id
 }
 
+# backend accept the traffic from app load balancer
+resource "aws_security_group_rule" "backend_app_alb" { # mysql accepting traffic through bastion
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8080
+  protocol          = "tcp"
+  source_security_group_id = module.app_alb_sg.sg_id
+  security_group_id = module.backend_sg.sg_id
+}
+
 # mysql accept the traffic from backend
 resource "aws_security_group_rule" "mysql_backend" { # mysql accepting traffic through bastion
   type              = "ingress"
@@ -188,5 +210,15 @@ resource "aws_security_group_rule" "mysql_backend" { # mysql accepting traffic t
   protocol          = "tcp"
   source_security_group_id = module.backend_sg.sg_id
   security_group_id = module.mysql_sg.sg_id
+}
+
+# vpn traffic
+resource "aws_security_group_rule" "web_alb_https" { # terraform aws security group rule --> terraform registry
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"] 
+  security_group_id = module.web_alb_sg.sg_id
 }
 

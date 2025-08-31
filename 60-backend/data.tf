@@ -28,3 +28,12 @@ data "aws_ssm_parameter" "backend_sg_id" { # parameter store in aws data source 
 data "aws_ssm_parameter" "private_subnet_id" { # parameter store in aws data source terraform --> terraform registry
   name = "/${var.project_name}/${var.environment}/private_subnet_id"
 } # we get output in string of public subnet ids
+
+data "aws_ssm_parameter" "vpc_id" { # parameter store in aws data source terraform --> terraform registry
+  name = "/${var.project_name}/${var.environment}/vpc_id"
+}
+
+
+data "aws_ssm_parameter" "app_alb_listener_arn" { # parameter store in aws data source terraform --> terraform registry
+  name = "/${var.project_name}/${var.environment}/app_alb_listener_arn"
+}

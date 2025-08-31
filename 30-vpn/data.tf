@@ -26,6 +26,6 @@ data "aws_ssm_parameter" "vpn_sg_id" { # parameter store in aws data source terr
 }
 
 # it read the content of /expense/dev//vpc_id ssm parameter
-data "aws_ssm_parameter" "public_subnet_ids" { # parameter store in aws data source terraform --> terraform registry
-  name = "/${var.project_name}/${var.environment}/public_subnet_ids"
+data "aws_ssm_parameter" "public_subnet_id" { # parameter store in aws data source terraform --> terraform registry
+  name = "/${var.project_name}/${var.environment}/public_subnet_id"
 } # we get output in string of public subnet ids
