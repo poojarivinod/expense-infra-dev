@@ -14,10 +14,6 @@ variable "common_tags" {
     }
 }
 
-variable "zone_id" {
-    default = "Z0802349255PD9KZJ7SQF"
-}
-
 variable "domain_name" {
-    default  = "poojari.store"
+    default = "poojari.store"
 }

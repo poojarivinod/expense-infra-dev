@@ -26,11 +26,11 @@ resource "aws_lb_listener" "https" { #aws alb listener --> terrafrom registry
   certificate_arn   = local.web_alb_certificate_arn
 
  default_action {
-    type = "fixed-response" # still we don't have backend application instance, so we are using the fixed response for testing purpose
+    type = "fixed-response" # still we don't have frontend application instance, so we are using the fixed response for testing purpose
 
     fixed_response {
       content_type = "text/html"
-      message_body = "<h1>Hello, I am from backend APP ALB</h1>"
+      message_body = "<h1>Hello, I am from frontend APP ALB</h1>"
       status_code  = "200"
   }
 }  
@@ -38,7 +38,7 @@ resource "aws_lb_listener" "https" { #aws alb listener --> terrafrom registry
 
 resource "aws_route53_record" "web_alb" { # aws route 53 record terraform --> terraform registry
   zone_id = var.zone_id
-  name    = "*.${var.domain_name}"
+  name    =  "expense-${var.environment}.${var.domain_name}"
   type    = "A"
 
 # these are ALB DNS name and zone information 

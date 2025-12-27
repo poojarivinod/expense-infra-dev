@@ -212,7 +212,7 @@ resource "aws_security_group_rule" "mysql_backend" { # mysql accepting traffic t
   security_group_id = module.mysql_sg.sg_id
 }
 
-# vpn traffic
+# web alb https accepts traffic from internet or user 
 resource "aws_security_group_rule" "web_alb_https" { # terraform aws security group rule --> terraform registry
   type              = "ingress"
   from_port         = 443
@@ -222,3 +222,34 @@ resource "aws_security_group_rule" "web_alb_https" { # terraform aws security gr
   security_group_id = module.web_alb_sg.sg_id
 }
 
+
+# app alb http accept the traffic from frontend
+resource "aws_security_group_rule" "app_alb_frontend" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  source_security_group_id = module.frontend_sg.sg_id
+  security_group_id = module.app_alb_sg.sg_id
+}
+
+# frontend accept the traffic from web_alb
+resource "aws_security_group_rule" "frontend_web_alb" { 
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  source_security_group_id = module.web_alb_sg.sg_id
+  security_group_id = module.frontend_sg.sg_id
+}
+
+# frontend accepts traffic from public 
+# usually you should configure forntend using private ip from vpn only
+resource "aws_security_group_rule" "frontend_public" { # terraform aws security group rule --> terraform registry
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"] 
+  security_group_id = module.frontend_sg.sg_id
+}
